@@ -54,7 +54,16 @@ func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "创建新的文章")
+	if err := r.ParseForm(); err != nil {
+		fmt.Fprint(w, "请提供正确的数据")
+		return
+	}
+
+	title := r.PostForm.Get("title")
+
+	fmt.Fprintf(w, "POST PostForm: %v <br>", r.FormValue("title"))
+	fmt.Fprintf(w, "POST Form: %v <br>", r.PostFormValue("title"))
+	fmt.Fprintf(w, "title 的值为：%v", title)
 }
 
 func forceHTMLMiddleware(h http.Handler) http.Handler {
