@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
 	"html/template"
 	"net/http"
 	"net/url"
 	"strings"
 	"unicode/utf8"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
 )
 
 var router = mux.NewRouter()
