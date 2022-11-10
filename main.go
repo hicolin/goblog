@@ -49,7 +49,7 @@ func (a Article) Link() string {
 }
 
 func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
-	id := getRouteVariable("id", r)
+	id := route.GetRouteVariable("id", r)
 	article, err := getArticleByID(id)
 
 	if err != nil {
@@ -79,11 +79,6 @@ func Int64ToString(num int64) string {
 	return strconv.FormatInt(num, 10)
 }
 
-func getRouteVariable(parameterName string, r *http.Request) string {
-	vars := mux.Vars(r)
-	return vars[parameterName]
-}
-
 func getArticleByID(id string) (Article, error) {
 	article := Article{}
 	query := "SELECT * FROM articles WHERE id = ?"
@@ -92,7 +87,7 @@ func getArticleByID(id string) (Article, error) {
 }
 
 func articlesEditHandler(w http.ResponseWriter, r *http.Request) {
-	id := getRouteVariable("id", r)
+	id := route.GetRouteVariable("id", r)
 	article, err := getArticleByID(id)
 
 	if err != nil {
@@ -138,7 +133,7 @@ func validateArticleFormData(title string, body string) map[string]string {
 }
 
 func articlesUpdateHandler(w http.ResponseWriter, r *http.Request) {
-	id := getRouteVariable("id", r)
+	id := route.GetRouteVariable("id", r)
 	_, err := getArticleByID(id)
 
 	if err != nil {
@@ -298,7 +293,7 @@ func saveArticleToDB(title, body string) (int64, error) {
 }
 
 func articlesDeleteHandler(w http.ResponseWriter, r *http.Request) {
-	id := getRouteVariable("id", r)
+	id := route.GetRouteVariable("id", r)
 	article, err := getArticleByID(id)
 
 	if err != nil {
