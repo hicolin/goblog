@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"goblog/pkg/route"
 	"html/template"
 	"log"
 	"net/http"
@@ -16,7 +17,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var router = mux.NewRouter()
+var router *mux.Router
 var db *sql.DB
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +64,7 @@ func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		tmpl, err := template.New("show.gohtml").
 			Funcs(template.FuncMap{
-				"RouteName2URL": RouteName2URL,
+				"RouteName2URL": route.Name2URL,
 				"Int64ToString": Int64ToString,
 			}).
 			ParseFiles("resources/views/articles/show.gohtml")
@@ -72,15 +73,6 @@ func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
 		err = tmpl.Execute(w, article)
 		checkError(err)
 	}
-}
-
-func RouteName2URL(routeName string, pairs ...string) string {
-	routeUrl, err := router.Get(routeName).URL(pairs...)
-	if err != nil {
-		checkError(err)
-		return ""
-	}
-	return routeUrl.String()
 }
 
 func Int64ToString(num int64) string {
@@ -405,6 +397,9 @@ func checkError(err error) {
 func main() {
 	initDB()
 	createTables()
+
+	route.Initialize()
+	router := route.Router
 
 	router.HandleFunc("/", homeHandler).Methods("GET").Name("home")
 	router.HandleFunc("/about", aboutHandler).Methods("GET").Name("about")
