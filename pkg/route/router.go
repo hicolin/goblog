@@ -3,18 +3,11 @@ package route
 import (
 	"github.com/gorilla/mux"
 	"goblog/pkg/logger"
-	"goblog/routes"
 	"net/http"
 )
 
-var Router *mux.Router
-
-func Initialize() {
-	Router = mux.NewRouter()
-	routes.RegisterWebRoutes(Router)
-}
-
 func Name2URL(routeName string, pairs ...string) string {
+	var Router *mux.Router
 	url, err := Router.Get(routeName).URL(pairs...)
 	if err != nil {
 		logger.LogError(err)

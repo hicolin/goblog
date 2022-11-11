@@ -3,18 +3,16 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/gorilla/mux"
+	"goblog/bootstrap"
 	"goblog/pkg/database"
 	"goblog/pkg/logger"
-	"goblog/pkg/route"
-	"goblog/pkg/types"
 	"html/template"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"unicode/utf8"
-
-	"github.com/gorilla/mux"
 )
 
 var router *mux.Router
@@ -48,33 +46,6 @@ func (a Article) Link() string {
 	return showURL.String()
 }
 
-func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
-	id := route.GetRouteVariable("id", r)
-	article, err := getArticleByID(id)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprint(w, "404 文章未找到")
-		} else {
-			logger.LogError(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, "500 服务器内部错误")
-		}
-	} else {
-		tmpl, err := template.New("show.gohtml").
-			Funcs(template.FuncMap{
-				"RouteName2URL": route.Name2URL,
-				"Int64ToString": types.Int64ToString,
-			}).
-			ParseFiles("resources/views/articles/show.gohtml")
-
-		logger.LogError(err)
-		err = tmpl.Execute(w, article)
-		logger.LogError(err)
-	}
-}
-
 func getArticleByID(id string) (Article, error) {
 	article := Article{}
 	query := "SELECT * FROM articles WHERE id = ?"
@@ -83,7 +54,7 @@ func getArticleByID(id string) (Article, error) {
 }
 
 func articlesEditHandler(w http.ResponseWriter, r *http.Request) {
-	id := route.GetRouteVariable("id", r)
+	id := getRouteVariable("id", r)
 	article, err := getArticleByID(id)
 
 	if err != nil {
@@ -129,7 +100,7 @@ func validateArticleFormData(title string, body string) map[string]string {
 }
 
 func articlesUpdateHandler(w http.ResponseWriter, r *http.Request) {
-	id := route.GetRouteVariable("id", r)
+	id := getRouteVariable("id", r)
 	_, err := getArticleByID(id)
 
 	if err != nil {
@@ -289,7 +260,7 @@ func saveArticleToDB(title, body string) (int64, error) {
 }
 
 func articlesDeleteHandler(w http.ResponseWriter, r *http.Request) {
-	id := route.GetRouteVariable("id", r)
+	id := getRouteVariable("id", r)
 	article, err := getArticleByID(id)
 
 	if err != nil {
@@ -347,14 +318,17 @@ func removeTrailingSlash(next http.Handler) http.Handler {
 	})
 }
 
+func getRouteVariable(parameterName string, r *http.Request) string {
+	vars := mux.Vars(r)
+	return vars[parameterName]
+}
+
 func main() {
 	database.Initialize()
 	db = database.DB
 
-	route.Initialize()
-	router = route.Router
+	router = bootstrap.SetupRoute()
 
-	router.HandleFunc("/articles/{id:[0-9]+}", articlesShowHandler).Methods("GET").Name("articles.show")
 	router.HandleFunc("/articles", articlesIndexHandler).Methods("GET").Name("articles.index")
 	router.HandleFunc("/articles", articlesStoreHandler).Methods("POST").Name("articles.store")
 	router.HandleFunc("/articles/create", articlesCreateHandler).Methods("GET").Name("articles.create")
