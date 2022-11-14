@@ -6,9 +6,14 @@ import (
 	"net/http"
 )
 
+var route *mux.Router
+
+func SetRoute(r *mux.Router) {
+	route = r
+}
+
 func Name2URL(routeName string, pairs ...string) string {
-	var Router *mux.Router
-	url, err := Router.Get(routeName).URL(pairs...)
+	url, err := route.Get(routeName).URL(pairs...)
 	if err != nil {
 		logger.LogError(err)
 		return ""
