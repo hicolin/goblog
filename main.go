@@ -18,32 +18,9 @@ import (
 var router *mux.Router
 var db *sql.DB
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "<h1>Hello, 欢迎来到 goblog！</h1>")
-}
-
-func aboutHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "此博客是用以记录编程笔记，如您有反馈和建议，请联系我！<a href=\"http://www.baidu.com\">百度一下</a>")
-
-}
-
-func notFoundHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotFound)
-	fmt.Fprint(w, "<h1>请求页面未找到:(</h1><p>如有疑惑，请联系我们。</p>")
-}
-
 type Article struct {
 	Title, Body string
 	ID          int64
-}
-
-func (a Article) Link() string {
-	showURL, err := router.Get("articles.show").URL("id", strconv.FormatInt(a.ID, 10))
-	if err != nil {
-		logger.LogError(err)
-		return ""
-	}
-	return showURL.String()
 }
 
 func getArticleByID(id string) (Article, error) {
@@ -149,29 +126,6 @@ func articlesUpdateHandler(w http.ResponseWriter, r *http.Request) {
 			logger.LogError(err)
 		}
 	}
-}
-
-func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query("SELECT * FROM articles")
-	logger.LogError(err)
-	defer rows.Close()
-
-	var articles []Article
-	for rows.Next() {
-		var article Article
-		err := rows.Scan(&article.ID, &article.Title, &article.Body)
-		logger.LogError(err)
-		articles = append(articles, article)
-	}
-
-	err = rows.Err()
-	logger.LogError(err)
-
-	tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
-	logger.LogError(err)
-
-	err = tmpl.Execute(w, articles)
-	logger.LogError(err)
 }
 
 func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
@@ -330,7 +284,6 @@ func main() {
 	bootstrap.SetupDB()
 	router = bootstrap.SetupRoute()
 
-	router.HandleFunc("/articles", articlesIndexHandler).Methods("GET").Name("articles.index")
 	router.HandleFunc("/articles", articlesStoreHandler).Methods("POST").Name("articles.store")
 	router.HandleFunc("/articles/create", articlesCreateHandler).Methods("GET").Name("articles.create")
 	router.HandleFunc("/articles/{id:[0-9]+}/edit", articlesEditHandler).Methods("GET").Name("articles.edit")
