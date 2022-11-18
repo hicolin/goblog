@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 	"html/template"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"unicode/utf8"
 )
@@ -48,9 +49,15 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "500 服务器内部错误")
 	} else {
-		tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
+		viewDir := "resources/views"
+		files, err := filepath.Glob(viewDir + "/layouts/*.gohtml")
 		logger.LogError(err)
-		err = tmpl.Execute(w, articles)
+
+		newFiles := append(files, viewDir+"/articles/index.gohtml")
+		tmpl, err := template.ParseFiles(newFiles...)
+		logger.LogError(err)
+
+		err = tmpl.ExecuteTemplate(w, "app", articles)
 		logger.LogError(err)
 	}
 }
