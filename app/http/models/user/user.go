@@ -5,7 +5,9 @@ import "goblog/app/http/models"
 type User struct {
 	models.BaseModel
 
-	Name     string `gorm:"colum:name;type:varchar(255);not null;unique"`
-	Email    string `gorm:"colum:email;type:varchar(255);default:NULL;unique"`
-	Password string `gorm:"colum:password;type:varchar(255)"`
+	Name     string `gorm:"type:varchar(255);not null;unique" valid:"name"`
+	Email    string `gorm:"type:varchar(255);unique" valid:"email"`
+	Password string `gorm:"type:varchar(255)" valid:"password"`
+
+	PasswordConfirm string `gorm:"-" valid:"password_confirm"`
 }
