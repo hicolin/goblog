@@ -11,3 +11,7 @@ type User struct {
 
 	PasswordConfirm string `gorm:"-" valid:"password_confirm"`
 }
+
+func (user *User) ComparePassword(password string) bool {
+	return user.Password == password
+}
