@@ -39,7 +39,6 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "500 服务器内部错误")
 	} else {
-		w.Header().Set("Key", "22222")
 		view.Render(w, view.D{
 			"Articles": articles,
 		}, "articles.index")
