@@ -2,6 +2,7 @@ package route
 
 import (
 	"github.com/gorilla/mux"
+	"goblog/pkg/config"
 	"goblog/pkg/logger"
 	"net/http"
 )
@@ -18,7 +19,7 @@ func Name2URL(routeName string, pairs ...string) string {
 		logger.LogError(err)
 		return ""
 	}
-	return url.String()
+	return config.GetString("app.url") + url.String()
 }
 
 func GetRouteVariable(parameterName string, r *http.Request) string {
