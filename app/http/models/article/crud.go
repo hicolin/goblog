@@ -63,3 +63,15 @@ func GetByUserID(uid string) ([]Article, error) {
 	}
 	return articles, nil
 }
+
+func GetByCategoryID(cid string, r *http.Request, perPage int) ([]Article, pagination.ViewData, error) {
+	db := model.DB.Model(Article{}).Where("category_id = ?", cid).Order("created_at desc")
+	_pager := pagination.New(r, db, route.Name2URL("categories.show", "id", cid), perPage)
+
+	viewData := _pager.Paging()
+
+	var articles []Article
+	_pager.Results(&articles)
+
+	return articles, viewData, nil
+}
