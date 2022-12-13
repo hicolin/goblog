@@ -20,6 +20,9 @@ func init() {
 //go:embed resources/views/layouts/*
 var tplFS embed.FS
 
+//go:embed public/*
+var staticFS embed.FS
+
 func main() {
 	// 初始化 SQL
 	bootstrap.SetupDB()
@@ -28,7 +31,7 @@ func main() {
 	bootstrap.SetupTemplate(tplFS)
 
 	// 初始化路由绑定
-	router := bootstrap.SetupRoute()
+	router := bootstrap.SetupRoute(staticFS)
 
 	http.ListenAndServe(":"+c.GetString("app.port"), middlewares.RemoveTrailingSlash(router))
 }
